@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'ckeditor',
+    'ckeditor_uploader',
     'main',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -120,6 +122,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+CKEDITOR_UPLOAD_PATH = "uploads/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
