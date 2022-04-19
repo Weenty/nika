@@ -10,6 +10,7 @@ INSTALLED_APPS = [
     'ckeditor',
     "corsheaders",
     'ckeditor_uploader',
+    'mptt',
     'main',
     'goods',
     'djoser',

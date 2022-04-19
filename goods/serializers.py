@@ -1,17 +1,10 @@
-from pyexpat import model
-from pyrsistent import field
 from rest_framework import serializers
-from .models import section, caterogy, products, package, image
+from .models import products, package, section_and_caterogy
 
 
-class SectionSerializer(serializers.ModelSerializer):
+class SectionAndCatogorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = section
-        fields = ['id', 'name']
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = caterogy
+        model = section_and_caterogy
         fields = ['id', 'name']
 
 class PachageSerializer(serializers.ModelSerializer):
@@ -20,10 +13,10 @@ class PachageSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'cost', 'quantity', 'image']
 
 class ProductsSerializer(serializers.ModelSerializer):
+    category = SectionAndCatogorySerializer(read_only=True, many=True)
     class Meta:
         model = products
         fields = [
-        'id', 
         'name',
         'discription',
         'discount',
@@ -34,6 +27,5 @@ class ProductsSerializer(serializers.ModelSerializer):
         'composition',
         'rating',
         'number_of_views',
-        'category',
         'package'
         ]

@@ -1,5 +1,4 @@
-from struct import pack
-from goods.models import section, caterogy, products, package
+from goods.models import products, package, section_and_caterogy
 from . import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,7 +6,7 @@ from django.shortcuts import get_list_or_404, get_object_or_404
 
 class SectionsList(APIView):
     def get_section_categorys(self, id):
-        return get_list_or_404(caterogy.objects.filter(section=id))
+        return get_list_or_404(section_and_caterogy.objects.filter(section=id, parent=None))
     
     def get_sections_list(self):
         return get_list_or_404(section.objects.all())
@@ -55,4 +54,5 @@ class Products(APIView):
             serialize_product = serializers.ProductsSerializer(self.get_product_object(id))
             serialize_package = serializers.PachageSerializer(self.get_package(serialize_product.data['package']))
             serialize_product.data['package'] = serialize_package
-        return Response(serialize_product)
+        else: serialize_product = serializers.ProductsSerializer(self.get_products_list(), many=True)
+        return Response(serialize_product.data)

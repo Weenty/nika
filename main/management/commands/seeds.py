@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand
+from goods.models import section
 from nika.factory import SectionFactory, CaterogyFactory, PackageFactory, ProductsFactory, UsersFactory, ImageFactory, BasketFactory
+
 
 class Command(BaseCommand):
     help = 'Seeds the database.'
@@ -12,10 +14,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for _ in range(options['all']):
-            SectionFactory.create()
-            CaterogyFactory.create()
-            PackageFactory.create()
-            ImageFactory.create()
-            BasketFactory.create()
-            ProductsFactory.create()
-            UsersFactory.create()
+            ten_section = SectionFactory.create_batch(10)
+            category = CaterogyFactory(section=ten_section)
+            print(category)
+            # SectionFactory.create()
+            # CaterogyFactory.create()
+            # PackageFactory.create()
+            # ProductsFactory.create()
+            # UsersFactory.create()
