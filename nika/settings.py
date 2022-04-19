@@ -3,7 +3,7 @@ import django_heroku
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-w3e&#cp2_15%-(84s#v7349e+q^qxp-zv_kh^1q0o*&9qh(jd)'
 django_heroku.settings(locals())
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 INSTALLED_APPS = [
