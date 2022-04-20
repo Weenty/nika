@@ -23,7 +23,7 @@ class Command(BaseCommand):
                 PackageFactory.create()
                 ProductsFactory.create()
                 ProductHasSectionCategoryFactory.create()
-                ProductsWith2PackageFactory.create()
+                ProductHasPackagesFactory.create()
                 UsersFactory.create()
                 # ProductsWith2CategoryFactory.create()
                 # ProductsWithCategoryFactory.create()
@@ -44,7 +44,7 @@ class Command(BaseCommand):
                 ProductHasSectionCategoryFactory.create()
         if options['productpackage']:
             for _ in range(options['package']):
-                ProductsWith2PackageFactory.create()
+                ProductHasPackagesFactory.create()
         if options['users']:
             for _ in range(options['users']):
                 UsersFactory.create()
