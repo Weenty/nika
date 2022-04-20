@@ -32,5 +32,6 @@ class ProductsSerializer(serializers.ModelSerializer):
         'composition',
         'rating',
         'number_of_views',
-        'package'
+        'package',
+        'category'
         ]
