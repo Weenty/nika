@@ -3,11 +3,7 @@ import factory
 import factory.fuzzy
 from django.utils.timezone import now
 import factory.django
-<<<<<<< HEAD
 from goods.models import *
-=======
-from goods.models import products, caterogy, section, package, image
->>>>>>> fa624badf8fe4786d7c2ec3ce20398ac2f1a89aa
 from main.models import users, basket
 
 class SectionFactory(factory.django.DjangoModelFactory):  
@@ -15,37 +11,11 @@ class SectionFactory(factory.django.DjangoModelFactory):
         model = section_and_caterogy
     name = factory.Faker('sentence', nb_words=2)
 
-<<<<<<< HEAD
 class CategoryFactory(factory.django.DjangoModelFactory):  
     class Meta:
         model = section_and_caterogy
     parent = factory.Iterator(section_and_caterogy.objects.filter(parent = None))
     name = factory.Faker('sentence', nb_words=2)
-=======
-    @factory.post_generation
-    def categorys(self, create, extracted, **kwargs):
-        if not create:
-            return
-
-        if extracted:
-            for category in extracted:
-                self.categorys.add(category)
-
-class CaterogyFactory(factory.django.DjangoModelFactory):  
-    class Meta:
-        model = caterogy
-    name = factory.Sequence(lambda n: "сaterogy #%s" % n)
-
-    @factory.post_generation
-    def sections(self, create, extracted, **kwargs):
-        if not create:
-            return
-
-        if extracted:
-            for section in extracted:
-                self.sections.add(section)
-
->>>>>>> fa624badf8fe4786d7c2ec3ce20398ac2f1a89aa
 
 class ImageFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -78,26 +48,8 @@ class ProductsFactory(factory.django.DjangoModelFactory):
     manufacturer = factory.Faker('last_name')
     best_before_date = factory.fuzzy.FuzzyDate(datetime.datetime.now().date())
     composition = factory.Faker('sentence', nb_words=10)
-<<<<<<< HEAD
     rating = factory.SubFactory(RatingFactory)
     number_of_views = factory.Faker('pyint', min_value=0, max_value=20)
-=======
-    rating = factory.Faker('pyint', min_value=0, max_value=10)
-    number_of_views = factory.Faker('pyint', min_value=0, max_value=20)
-    package = factory.Iterator(package.objects.all())
-    caterogy = factory.Iterator(caterogy.objects.all())
-    @factory.post_generation
-    def сaterogy(self, create, extracted, **kwargs):
-        if not create:
-            # Simple build, do nothing.
-            return
-
-        if extracted:
-            for group in extracted:
-                self.сaterogy.add(group)
-
-
->>>>>>> fa624badf8fe4786d7c2ec3ce20398ac2f1a89aa
 
 class BasketFactory(factory.django.DjangoModelFactory):
     class Meta:

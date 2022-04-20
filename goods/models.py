@@ -1,4 +1,3 @@
-from pyexpat import model
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 
@@ -12,11 +11,6 @@ class section_and_caterogy(MPTTModel):
     def __str__(self):
         return self.name
 
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> fa624badf8fe4786d7c2ec3ce20398ac2f1a89aa
 class image(models.Model):
     image = models.ImageField(upload_to='uploads/')
 
@@ -43,7 +37,6 @@ class products(models.Model):
     composition = models.CharField(max_length=255, default='')
     rating = models.OneToOneField(rating, on_delete=models.PROTECT)
     number_of_views = models.IntegerField(default=0)
-<<<<<<< HEAD
     category = models.ManyToManyField('section_and_caterogy', through='product_has_section_and_category')
     package = models.ManyToManyField('package', through='product_has_packages')
     def __str__(self):
@@ -53,13 +46,6 @@ class product_has_packages(models.Model):
     product = models.ForeignKey(products, on_delete=models.PROTECT)
     package = models.ForeignKey(package, on_delete=models.PROTECT)
 
-=======
-    category = models.ManyToManyField(section_and_caterogy, through='product_has_section_and_category')
-    package = models.ForeignKey(package, on_delete=models.PROTECT)
-    def __str__(self):
-        return self.name
-
->>>>>>> fa624badf8fe4786d7c2ec3ce20398ac2f1a89aa
 class product_has_section_and_category(models.Model):
     product = models.ForeignKey(products, on_delete=models.PROTECT)
     section_and_caterogy = models.ForeignKey(section_and_caterogy, on_delete=models.PROTECT)
