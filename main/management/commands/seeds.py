@@ -1,10 +1,5 @@
 from django.core.management.base import BaseCommand
-<<<<<<< HEAD
 from nika.factory import *
-=======
-from goods.models import section
-from nika.factory import SectionFactory, CaterogyFactory, PackageFactory, ProductsFactory, UsersFactory, ImageFactory, BasketFactory
->>>>>>> fa624badf8fe4786d7c2ec3ce20398ac2f1a89aa
 
 
 class Command(BaseCommand):
@@ -21,7 +16,6 @@ class Command(BaseCommand):
         parser.add_argument('--productpackage', type=int, help='Number of fake relationship Products with Package for the database')
 
     def handle(self, *args, **options):
-<<<<<<< HEAD
         if options['all']:
             for _ in range(options['all']):
                 SectionFactory.create()
@@ -57,14 +51,3 @@ class Command(BaseCommand):
     
     
     
-=======
-        for _ in range(options['all']):
-            ten_section = SectionFactory.create_batch(10)
-            category = CaterogyFactory(section=ten_section)
-            print(category)
-            # SectionFactory.create()
-            # CaterogyFactory.create()
-            # PackageFactory.create()
-            # ProductsFactory.create()
-            # UsersFactory.create()
->>>>>>> fa624badf8fe4786d7c2ec3ce20398ac2f1a89aa
