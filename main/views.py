@@ -1,6 +1,12 @@
 import requests
 from json import loads
 from django.http import JsonResponse
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.shortcuts import get_list_or_404
+from rest_framework.permissions import IsAuthenticated
+from .serializers import *
+from rest_framework import status
 
 
 def actiovation_post(request, uid, token):
@@ -10,3 +16,24 @@ def actiovation_post(request, uid, token):
         return JsonResponse(loads(res.text))
 
 
+class BacketView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BacketSerializer
+
+    def get_backet(self, user_id):
+        return get_list_or_404(basket.objects.filter(user_id=user_id))
+
+    def get(self, request):
+        user_id = request.user.id
+        serializes = BacketSerializer(self.get_backet(user_id), many=True)
+        return Response(serializes.data)
+
+    def post(self, request):
+        print(request.data)
+        serializer = BacketSerializer(data=request.data)
+        print(serializer)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

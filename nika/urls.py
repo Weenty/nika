@@ -27,5 +27,6 @@ urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')),
     path('auth/users/activation/<str:uid>/<str:token>', actiovation_post, name='accept Email'),
     # path('auth/', include('djoser.urls.jwt')),
-    path('', include('goods.urls'), name='Get list section')
+    path('', include('goods.urls'), name='Get list section'),
+    path('', include('main.urls'), name='Get and post user backet'),
 ]

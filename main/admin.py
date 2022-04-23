@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib import admin
-from .models import users
+from .models import *
 from goods.models import *
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from mptt.admin import MPTTModelAdmin
@@ -16,6 +16,7 @@ admin.site.register(users)
 admin.site.register(section_and_caterogy, MPTTModelAdmin)
 admin.site.register(package)
 admin.site.register(image)
+admin.site.register(basket)
 
 class ProductHasSectionAndCategoryInline(admin.TabularInline):
     model = product_has_section_and_category
