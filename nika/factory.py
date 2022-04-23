@@ -51,12 +51,6 @@ class ProductsFactory(factory.django.DjangoModelFactory):
     rating = factory.SubFactory(RatingFactory)
     number_of_views = factory.Faker('pyint', min_value=0, max_value=20)
 
-class BasketFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = basket
-    products = factory.SubFactory(ProductsFactory)
-    quantity = factory.Faker('pyint', min_value=0, max_value=50)
-    ordered = 0
     
 class UsersFactory(factory.django.DjangoModelFactory):  
     class Meta:
@@ -69,7 +63,15 @@ class UsersFactory(factory.django.DjangoModelFactory):
     date_joined = factory.LazyFunction(now)
     phone_number = factory.Faker('phone_number')
     email = factory.LazyAttribute(lambda a: '{}.{}@example.com'.format(a.first_name, a.last_name).lower())
-    basket = factory.SubFactory(BasketFactory)
+
+class BasketFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = basket
+    user = factory.SubFactory(UsersFactory)
+    products = factory.SubFactory(ProductsFactory)
+    package = factory.SubFactory(PackageFactory)
+    quantity = factory.Faker('pyint', min_value=0, max_value=50)
+    ordered = 0
 
 class ProductHasPackagesFactory(factory.django.DjangoModelFactory):
     class Meta:
