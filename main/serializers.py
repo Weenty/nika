@@ -3,10 +3,7 @@ from goods.serializers import ProductsSerializer, PackageSerializer
 from .models import *
 
 class BacketSerializer(serializers.ModelSerializer):
-    products = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='name'
-     )
+    products = ProductsSerializer(read_only=True)
     package = PackageSerializer(read_only=True)
     class Meta:
         model = basket
@@ -15,4 +12,3 @@ class BacketSerializer(serializers.ModelSerializer):
             'package',
             'quantity',
         ]
-
