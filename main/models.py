@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from goods.models import products, package
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class users(AbstractUser):
     class Meta:
@@ -10,7 +13,36 @@ class users(AbstractUser):
     email = models.EmailField(unique=True)
     def __str__(self):
         return self.username
-        
+
+class comments(models.Model):
+    user = models.ForeignKey('users', on_delete=models.CASCADE, null=True)
+    products = models.ForeignKey(products, on_delete=models.CASCADE)
+    title = models.CharField(max_length=150, null=True, blank=True)
+    text = models.TextField(default='', null=True, blank=True)
+    grade = models.SmallIntegerField(
+        null=False, 
+        validators=[MinValueValidator(0), MaxValueValidator(10)]
+        )
+    def __str__(self):
+        return str(self.grade)
+
+    def calculate_rating(self):
+        return self.grade, self.products
+
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+
+@receiver(post_save, sender=comments)
+def Calculate_rating(sender, instance, created, *args, **kwargs):
+    grade, product = instance.calculate_rating()
+    result_rating = 0
+    comments_list = comments.objects.filter(products=product)
+    for grade in comments_list:
+        result_rating += getattr(grade, 'grade')
+    new_rate = getattr(product, 'rating')
+    new_rate.rating = result_rating/len(comments_list)
+    new_rate.save()
 
 class basket(models.Model):
     user = models.ForeignKey('users', on_delete=models.CASCADE, null=True)
@@ -37,7 +69,6 @@ class point_of_issue(models.Model):
     house = models.CharField(max_length=45)
     
 class order(models.Model):
-    id_basket = models.ForeignKey('basket', on_delete=models.CASCADE)
     user = models.OneToOneField(users, on_delete=models.CASCADE)
     final_cost = models.DecimalField(max_digits=7, decimal_places=0)
     order_list = models.ManyToManyField(products, through='orders_list')
@@ -51,6 +82,7 @@ class order(models.Model):
 
 class orders_list(models.Model):
     cost = models.DecimalField(max_digits=7, decimal_places=0)
+    quantity = models.IntegerField(default=1)
     order = models.ForeignKey(order, on_delete=models.CASCADE)
     product = models.ForeignKey(products, on_delete=models.CASCADE)
     package = models.ForeignKey(package, on_delete=models.CASCADE)

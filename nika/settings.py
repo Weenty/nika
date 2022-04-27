@@ -6,7 +6,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-w3e&#cp2_15%-(84s#v7349e+q^qxp-zv_kh^1q0o*&9qh(jd)'
 DEBUG = True
 
-ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'rest_framework.authtoken',
     'ckeditor',
@@ -28,6 +27,9 @@ INSTALLED_APPS = [
 ]
 
 APPEND_SLASH = False
+ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
+CORS_ORIGIN_ALLOW_ALL=True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

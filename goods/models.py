@@ -1,5 +1,6 @@
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class section_and_caterogy(MPTTModel):
     name = models.CharField(max_length=20)
@@ -16,6 +17,10 @@ class section_and_caterogy(MPTTModel):
 
 class image(models.Model):
     image = models.ImageField()
+
+    def __str__(self):
+        return str(self.image)
+
     class Meta:
         verbose_name = 'Изображение'
         verbose_name_plural = 'Изображения'
@@ -28,12 +33,18 @@ class package(models.Model):
     image = models.OneToOneField(image, on_delete=models.CASCADE, default='')
     def __str__(self):
         return self.name
+
     class Meta:
         verbose_name = 'Пакет'
         verbose_name_plural = 'Пакеты'
 
 class rating(models.Model):
-    rating = models.FloatField(default=0)
+    rating = models.FloatField(
+        default=0, 
+        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)],
+        )
+    def __str__(self):
+        return str(self.rating)
 
 class products(models.Model):
     name = models.CharField(max_length=45)
@@ -53,7 +64,7 @@ class products(models.Model):
     class Meta:
         verbose_name = 'Товар'
         verbose_name_plural = 'Товары'
-
+    
 class product_has_packages(models.Model):
     product = models.ForeignKey(products, on_delete=models.CASCADE)
     package = models.ForeignKey(package, on_delete=models.CASCADE)

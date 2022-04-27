@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import section_and_caterogy, products, package
+from .models import *
 
 
 class SectionAndCategorySerializer(serializers.ModelSerializer):
@@ -7,7 +7,13 @@ class SectionAndCategorySerializer(serializers.ModelSerializer):
         model = section_and_caterogy
         fields = ['id', 'name']
 
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = image
+        fields = ['image']
+
 class PackageSerializer(serializers.ModelSerializer):
+    image = ImageSerializer(read_only=True)
     class Meta:
         model = package
         fields = ['id', 'name', 'cost', 'quantity', 'image']
@@ -18,7 +24,7 @@ class ProductsSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='name'
     )
-    package = PackageSerializer(read_only=True, many=True)
+    package = PackageSerializer(many=True, read_only=True)
     class Meta:
         model = products
         fields = [

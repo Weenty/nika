@@ -29,7 +29,6 @@ class CategorysList(APIView):
         return get_list_or_404(section_and_caterogy.objects.filter(parent__isnull = False))
 
     def get(self, request, pk=None):
-   
         id = pk or request.query_params.get('id')
         if id:
             serializer = serializers.ProductsSerializer(self.get_products_in_category(id), many=True)
