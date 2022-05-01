@@ -2,7 +2,7 @@ from goods.models import section_and_caterogy, products
 from . import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.shortcuts import get_list_or_404
+from django.shortcuts import get_list_or_404, get_object_or_404
 
 class SectionsList(APIView):
     def get_section(self):
@@ -40,6 +40,13 @@ class CategorysList(APIView):
 class Products(APIView):
     def get_products_list(self):
         return get_list_or_404(products.objects.all())
+    
+    def get_product_object(self, product_id):
+        return get_object_or_404(products.objects.filter(id = product_id))
 
-    def get(self, request, pk=None):
-        return Response(serializers.ProductsSerializer(self.get_products_list(), many=True).data)
+    def get(self, request, product_id=None):
+        if product_id:
+            serializer = serializers.ProductsSerializer(self.get_product_object(product_id)).data
+        else:
+            serializer = serializers.ProductsSerializer(self.get_products_list(), many=True).data
+        return Response(serializer)

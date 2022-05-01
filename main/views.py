@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework.views import APIView
 from django.shortcuts import get_list_or_404
+from goods.models import product_has_packages
 
 def actiovation_post(request, uid, token):
     res = requests.post('http://127.0.0.1:8000/auth/users/activation/', data={"uid": uid, "token": token})
@@ -36,6 +37,19 @@ class BacketView(generics.ListCreateAPIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class OrderListView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get_order_list(self, order_id):
+        return get_list_or_404(orders_list.objects.filter(order=order_id))
+
+    def get(self, request, order_id=None):
+        order_id = order_id or request.query_params.get('order_id')
+        try:
+            order.objects.get(id = order_id, user = request.user.id)
+            serializer = OrderListSerializer(self.get_order_list(order_id), many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response({"detail":"Страница не найдена"}, status=status.HTTP_404_NOT_FOUND)
 
 class OrderView(APIView):
     permission_classes = [IsAuthenticated]
@@ -43,24 +57,52 @@ class OrderView(APIView):
     def get_orders(self, user_id):
         return get_list_or_404(order.objects.filter(user=user_id))
 
-    def get_order_list(self, order_id):
-        return get_list_or_404(orders_list.objects.filter(order=order_id))
-
-    def get(self, request, order_id=None):
-        order_id = order_id or request.query_params.get('order_id')
-        if order_id:
-            # serializer = OrderListSerializer(self.get_order_list(order_id), many=True)
-            pass
-        else:
-            serializer = OrderSerializer(self.get_orders(request.user.id), many=True)
-
+    def get(self, request):
+        serializer = OrderSerializerForGet(self.get_orders(request.user.id), many=True)
         return Response(serializer.data)
 
+    def post(self, request):
+        """
+    Запрос в таком формате. В order_list указывать id пакета. На данный момент можно добавлять лишь один товар в заказ, 
+    но это не на долго!
+        {
+    "point_of_issue": 1,
+    "receiving_method": 1,
+    "payment_method": 1,
+    "comment": "текст",
+    "quantity": 12,
+    "order_list": 2
+        }
+        """
+        data = request.data
+        data["user"] = request.user.id
+        quantity = data["quantity"]
+        package = data["order_list"]
+        serializer = OrderSerializerForPost(data=data)
+        if serializer.is_valid(raise_exception=True):
+            try:
+                order = serializer.save()
+                data = {
+                    "quantity": quantity,
+                    "order": order.id,
+                    "product": getattr(product_has_packages.objects.get(package = package), 'product').id,
+                    "package": package
+                }
+                serializer = OrderListSerializer(data=data)
+                if serializer.is_valid(raise_exception=True):
+                        serializer.save()
+                        return Response({"detail":"Ваш заказ успешно принят!", "id": order.id}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                if order:
+                    order.delete()
+                return Response({"detail":str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CommentsView(generics.ListCreateAPIView):
     """
     Для get-запроса необходим только path-параметр, содержащий id интересующего продукта. 
-    Для post-запроса структура подобного типа: 
+    Для post-запроса структура подобного типа. (title и text можно оставить пустыми)
         {
             "title": string, 
             "text": string,

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from goods.serializers import ProductsSerializer
+from goods.serializers import PackageSerializer, ProductsSerializer
 from main.models import *
 
 class BacketSerializer(serializers.ModelSerializer):
@@ -38,6 +38,7 @@ class OrderListSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=products.objects.all())
     package = serializers.PrimaryKeyRelatedField(queryset=package.objects.all())
     order = serializers.PrimaryKeyRelatedField(queryset=order.objects.all())
+    cost = serializers.DecimalField(read_only=True, max_digits=7, decimal_places=0)
     class Meta:
         model = orders_list
         fields = [
@@ -49,9 +50,8 @@ class OrderListSerializer(serializers.ModelSerializer):
         ]
 
 
-class OrderSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=users.objects.all())
-    order_list = ProductsSerializer(many=True)
+class OrderSerializerForGet(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only = True)
     payment_method = serializers.SlugRelatedField(
         read_only=True,
         slug_field='name'
@@ -65,12 +65,25 @@ class OrderSerializer(serializers.ModelSerializer):
         slug_field='sity'
     )
     final_cost = serializers.DecimalField(read_only=True, max_digits=7, decimal_places=0)
+    
     class Meta:
         model = order
         fields = [
             'id',
             'user',
             'final_cost',
+            'comment',
+            'payment_method',
+            'receiving_method',
+            'point_of_issue'
+        ]
+
+
+class OrderSerializerForPost(serializers.ModelSerializer):
+    class Meta:
+        model = order
+        fields = [
+            'user',
             'order_list',
             'comment',
             'payment_method',

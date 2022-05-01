@@ -68,7 +68,7 @@ class basket(models.Model):
             super().save(*args, **kwargs)
         else: 
             raise ValueError(f"Пакет {self.package} отсутствует у продукта {self.products}")
-
+    
 class paymant_method(models.Model):
     name = models.CharField(max_length=45)
 
@@ -82,26 +82,19 @@ class point_of_issue(models.Model):
     house = models.CharField(max_length=45)
     
 class order(models.Model):
-    user = models.OneToOneField(users, on_delete=models.CASCADE)
-    final_cost = models.DecimalField(max_digits=7, decimal_places=0)
-    order_list = models.ManyToManyField(products, through='orders_list')
+    user = models.ForeignKey(users, on_delete=models.CASCADE)
+    final_cost = models.DecimalField(max_digits=7, decimal_places=0, null=True, blank=True)
+    order_list = models.ManyToManyField(package, through='orders_list')
     comment = models.TextField()
-    payment_method = models.OneToOneField(paymant_method, on_delete=models.CASCADE)
-    receiving_method = models.OneToOneField(receiving_method, on_delete=models.CASCADE)
-    point_of_issue = models.OneToOneField(point_of_issue, on_delete=models.CASCADE)
+    payment_method = models.ForeignKey(paymant_method, on_delete=models.CASCADE)
+    receiving_method = models.ForeignKey(receiving_method, on_delete=models.CASCADE)
+    point_of_issue = models.ForeignKey(point_of_issue, on_delete=models.CASCADE)
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
-
-    def save(self, *args, **kwargs):
-        final_cost = 0
-        for product in orders_list.objects.filter(order = self.id):
-            final_cost += getattr(product, 'cost') * getattr(product, 'quantity')
-        self.final_cost = final_cost
-        super().save(*args, **kwargs)
-
+    
 class orders_list(models.Model):
-    cost = models.DecimalField(max_digits=7, decimal_places=0)
+    cost = models.DecimalField(max_digits=7, decimal_places=0, blank=True, null=True, default=0)
     quantity = models.IntegerField(default=1)
     order = models.ForeignKey(order, on_delete=models.CASCADE)
     product = models.ForeignKey(products, on_delete=models.CASCADE)
@@ -119,3 +112,12 @@ class orders_list(models.Model):
             super().save(*args, **kwargs)
         else: 
             raise ValueError(f"Пакет {self.package} отсутствует у продукта {self.product}")
+
+@receiver(post_save, sender=orders_list)
+def Calculate_rating(sender, instance, created, *args, **kwargs):
+    final_cost = 0
+    for product in orders_list.objects.filter(order = instance.order.id):
+        final_cost += int(getattr(product, 'cost')) * int(getattr(product, 'quantity'))
+    final = instance.order
+    final.final_cost = final_cost
+    final.save()
