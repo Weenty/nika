@@ -21,7 +21,6 @@ class Command(BaseCommand):
                 SectionFactory.create()
                 CategoryFactory.create()
                 PackageFactory.create()
-                ProductsFactory.create()
                 ProductHasSectionCategoryFactory.create()
                 ProductHasPackagesFactory.create()
                 BasketFactory.create()

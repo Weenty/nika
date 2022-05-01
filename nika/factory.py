@@ -1,4 +1,5 @@
 import datetime
+from operator import ge
 import factory
 import factory.fuzzy
 from django.utils.timezone import now
@@ -50,7 +51,6 @@ class ProductsFactory(factory.django.DjangoModelFactory):
     composition = factory.Faker('sentence', nb_words=10)
     rating = factory.SubFactory(RatingFactory)
     number_of_views = factory.Faker('pyint', min_value=0, max_value=20)
-
     
 class UsersFactory(factory.django.DjangoModelFactory):  
     class Meta:
@@ -64,20 +64,23 @@ class UsersFactory(factory.django.DjangoModelFactory):
     phone_number = factory.Faker('phone_number')
     email = factory.LazyAttribute(lambda a: '{}.{}@example.com'.format(a.first_name, a.last_name).lower())
 
-class BasketFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = basket
-    user = factory.SubFactory(UsersFactory)
-    products = factory.SubFactory(ProductsFactory)
-    package = factory.SubFactory(PackageFactory)
-    quantity = factory.Faker('pyint', min_value=0, max_value=50)
-    ordered = 0
-
 class ProductHasPackagesFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = product_has_packages
     product = factory.SubFactory(ProductsFactory)
     package = factory.SubFactory(PackageFactory)
+
+
+class BasketFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = basket
+    user = factory.SubFactory(UsersFactory)
+    # package = factory.SubFactory(ProductHasPackagesFactory)
+    # products = factory.SubFactory(ProductHasPackagesFactory)
+    # НАЙТИ СПОСОБ ЭТО РЕАЛИЗОВАТЬ, ИБО ВАЛИДАЦИЯ ДУШИТ
+    quantity = factory.Faker('pyint', min_value=0, max_value=50)
+    ordered = 0
+
 
 class ProductHasSectionCategoryFactory(factory.django.DjangoModelFactory):
     class Meta:

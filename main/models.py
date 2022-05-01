@@ -4,6 +4,7 @@ from goods.models import products, package
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.core.validators import MaxValueValidator, MinValueValidator
+from goods.models import product_has_packages
 
 class users(AbstractUser):
     class Meta:
@@ -56,6 +57,18 @@ class basket(models.Model):
         verbose_name = 'Корзина'
         verbose_name_plural = 'Товары корзины'
 
+    def save(self, *args, **kwargs):
+        packages = product_has_packages.objects.filter(product=self.products.id)
+        flag = False
+        for package in packages:
+            if self.package == getattr(package, 'package'):
+                flag = True
+                break
+        if flag:
+            super().save(*args, **kwargs)
+        else: 
+            raise ValueError(f"Пакет {self.package} отсутствует у продукта {self.products}")
+
 class paymant_method(models.Model):
     name = models.CharField(max_length=45)
 
@@ -80,9 +93,29 @@ class order(models.Model):
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
 
+    def save(self, *args, **kwargs):
+        final_cost = 0
+        for product in orders_list.objects.filter(order = self.id):
+            final_cost += getattr(product, 'cost') * getattr(product, 'quantity')
+        self.final_cost = final_cost
+        super().save(*args, **kwargs)
+
 class orders_list(models.Model):
     cost = models.DecimalField(max_digits=7, decimal_places=0)
     quantity = models.IntegerField(default=1)
     order = models.ForeignKey(order, on_delete=models.CASCADE)
     product = models.ForeignKey(products, on_delete=models.CASCADE)
     package = models.ForeignKey(package, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        packages = product_has_packages.objects.filter(product=self.product.id)
+        flag = False
+        for package in packages:
+            if self.package == getattr(package, 'package'):
+                self.cost = self.package.cost
+                flag = True
+                break
+        if flag:
+            super().save(*args, **kwargs)
+        else: 
+            raise ValueError(f"Пакет {self.package} отсутствует у продукта {self.product}")

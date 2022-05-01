@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from .serializers import *
 from rest_framework import status
 from rest_framework import generics
+from rest_framework.views import APIView
 from django.shortcuts import get_list_or_404
 
 def actiovation_post(request, uid, token):
@@ -35,6 +36,27 @@ class BacketView(generics.ListCreateAPIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class OrderView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_orders(self, user_id):
+        return get_list_or_404(order.objects.filter(user=user_id))
+
+    def get_order_list(self, order_id):
+        return get_list_or_404(orders_list.objects.filter(order=order_id))
+
+    def get(self, request, order_id=None):
+        order_id = order_id or request.query_params.get('order_id')
+        if order_id:
+            # serializer = OrderListSerializer(self.get_order_list(order_id), many=True)
+            pass
+        else:
+            serializer = OrderSerializer(self.get_orders(request.user.id), many=True)
+
+        return Response(serializer.data)
+
+
 class CommentsView(generics.ListCreateAPIView):
     """
     Для get-запроса необходим только path-параметр, содержащий id интересующего продукта. 
@@ -53,7 +75,6 @@ class CommentsView(generics.ListCreateAPIView):
         return get_list_or_404(comments.objects.filter(products = id))
 
     def list(self, request, product_id):
-
         id = product_id or request.query_params.get('product_id')
         serializer = CommentsSerializer(self.get_categorys_in_section(id), many=True)
         return Response(serializer.data)
