@@ -63,7 +63,7 @@ class OrderView(APIView):
 
     def post(self, request):
         """
-    Запрос в таком формате. В order_list указывать id пакета. На данный момент можно добавлять лишь один товар в заказ, 
+    Запрос в таком формате: В order_list указывать id пакета. На данный момент можно добавлять лишь один товар в заказ, 
     но это не на долго!
         {
     "point_of_issue": 1,
@@ -71,30 +71,36 @@ class OrderView(APIView):
     "payment_method": 1,
     "comment": "текст",
     "quantity": 12,
-    "order_list": 2
+    "order_list": [сюда передаем закидываем массив id корзины]
         }
         """
         data = request.data
-        data["user"] = request.user.id
-        quantity = data["quantity"]
-        package = data["order_list"]
+        user = request.user.id
+        data["user"] = user
         serializer = OrderSerializerForPost(data=data)
         if serializer.is_valid(raise_exception=True):
             try:
                 order = serializer.save()
-                data = {
-                    "quantity": quantity,
-                    "order": order.id,
-                    "product": getattr(product_has_packages.objects.get(package = package), 'product').id,
-                    "package": package
-                }
-                serializer = OrderListSerializer(data=data)
-                if serializer.is_valid(raise_exception=True):
+                for basket_id in data["order_list"]:
+                    basket_object = basket.objects.get(id=basket_id, user = user)
+                    data = {
+                        "product": basket_object.products.id,
+                        "package": basket_object.package.id,
+                        "quantity": basket_object.quantity,
+                        "cost": basket_object.package.cost,
+                        "order": order.id
+                    }
+                    serializer = OrderListSerializer(data=data)
+                    if serializer.is_valid(raise_exception=True):
                         serializer.save()
-                        return Response({"detail":"Ваш заказ успешно принят!", "id": order.id}, status=status.HTTP_400_BAD_REQUEST)
+                ordered = basket.objects.get(id=basket_object.id)
+                ordered.ordered = 1
+                ordered.save()
+                return Response({"detail":"Ваш заказ успешно принят!", "id": order.id}, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
                 if order:
                     order.delete()
+                    orders_list.objects.filter(order = order).delete()
                 return Response({"detail":str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

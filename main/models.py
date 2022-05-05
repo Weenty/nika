@@ -84,15 +84,14 @@ class point_of_issue(models.Model):
 class order(models.Model):
     user = models.ForeignKey(users, on_delete=models.CASCADE)
     final_cost = models.DecimalField(max_digits=7, decimal_places=0, null=True, blank=True)
-    order_list = models.ManyToManyField(package, through='orders_list')
-    comment = models.TextField()
+    comment = models.TextField(null=True, blank=True)
     payment_method = models.ForeignKey(paymant_method, on_delete=models.CASCADE)
     receiving_method = models.ForeignKey(receiving_method, on_delete=models.CASCADE)
     point_of_issue = models.ForeignKey(point_of_issue, on_delete=models.CASCADE)
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
-    
+
 class orders_list(models.Model):
     cost = models.DecimalField(max_digits=7, decimal_places=0, blank=True, null=True, default=0)
     quantity = models.IntegerField(default=1)

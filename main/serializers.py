@@ -15,7 +15,8 @@ class BacketSerializer(serializers.ModelSerializer):
             'products',
             'package',
             'quantity',
-            'user'
+            'user',
+            'ordered'
         ]
 
 
@@ -84,7 +85,6 @@ class OrderSerializerForPost(serializers.ModelSerializer):
         model = order
         fields = [
             'user',
-            'order_list',
             'comment',
             'payment_method',
             'receiving_method',
