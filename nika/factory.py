@@ -1,5 +1,4 @@
 import datetime
-from operator import ge
 import factory
 import factory.fuzzy
 from django.utils.timezone import now
@@ -15,7 +14,7 @@ class SectionFactory(factory.django.DjangoModelFactory):
 class CategoryFactory(factory.django.DjangoModelFactory):  
     class Meta:
         model = section_and_caterogy
-    parent = factory.Iterator(section_and_caterogy.objects.filter(parent = None))
+    parent = factory.fuzzy.FuzzyChoice(section_and_caterogy.objects.filter(parent__isnull = True))
     name = factory.Faker('sentence', nb_words=2)
 
 class ImageFactory(factory.django.DjangoModelFactory):
@@ -70,23 +69,30 @@ class ProductHasPackagesFactory(factory.django.DjangoModelFactory):
     product = factory.SubFactory(ProductsFactory)
     package = factory.SubFactory(PackageFactory)
 
+# def searchProduct(object):
+#     return product_has_packages.objects.filter(package = object)
 
-class BasketFactory(factory.django.DjangoModelFactory):
+# class BasketFactory(factory.django.DjangoModelFactory):
+#     class Meta:
+#         model = basket
+#     user = factory.SubFactory(UsersFactory)
+#     package = factory.fuzzy.FuzzyChoice(PackageFactory)
+#     products = factory.fuzzy.FuzzyChoice(searchProduct(package.getter.id))
+#     quantity = factory.Faker('pyint', min_value=0, max_value=50)
+#     ordered = 0
+# ЭТУ ШТУКУ ЗАФИКСИТЬ
+
+class CombinateProductsPackageFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = basket
-    user = factory.SubFactory(UsersFactory)
-    # package = factory.SubFactory(ProductHasPackagesFactory)
-    # products = factory.SubFactory(ProductHasPackagesFactory)
-    # НАЙТИ СПОСОБ ЭТО РЕАЛИЗОВАТЬ, ИБО ВАЛИДАЦИЯ ДУШИТ
-    quantity = factory.Faker('pyint', min_value=0, max_value=50)
-    ordered = 0
-
+        model = product_has_packages
+    product = factory.fuzzy.FuzzyChoice(products.objects.all())
+    package = factory.fuzzy.FuzzyChoice(package.objects.all())
 
 class ProductHasSectionCategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = product_has_section_and_category
-    product = factory.SubFactory(ProductsFactory)
-    section_and_caterogy = factory.SubFactory(CategoryFactory)
+    product = factory.fuzzy.FuzzyChoice(products.objects.all())
+    section_and_caterogy = factory.fuzzy.FuzzyChoice(section_and_caterogy.objects.filter(parent__isnull = False))
 
 ################ ProductsWithCategoryFactory ##################
 

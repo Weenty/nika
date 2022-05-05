@@ -11,6 +11,7 @@ class section_and_caterogy(MPTTModel):
     
     def __str__(self):
         return self.name
+
     class Meta:
         verbose_name = 'Секции и катогории'
         verbose_name_plural = 'Секции и категории'
