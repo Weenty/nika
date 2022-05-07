@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from goods.serializers import PackageSerializer, ProductsSerializer
 from main.models import *
 
 class BacketSerializer(serializers.ModelSerializer):
@@ -7,11 +6,12 @@ class BacketSerializer(serializers.ModelSerializer):
         queryset=products.objects.all())
     package = serializers.PrimaryKeyRelatedField(
         queryset=package.objects.all())
-    user = serializers.PrimaryKeyRelatedField(queryset=users.objects.all())
-
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    ordered = serializers.IntegerField(read_only=True)
     class Meta:
         model = basket
         fields = [
+            'id',
             'products',
             'package',
             'quantity',
