@@ -1,4 +1,3 @@
-from xml.dom import ValidationErr
 import requests
 from json import loads
 from django.http import JsonResponse

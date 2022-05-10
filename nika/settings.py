@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_yasg',
     # 'rest_framework_simplejwt',
+    'django_filters',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -27,12 +28,13 @@ INSTALLED_APPS = [
     
 ]
 
-APPEND_SLASH = False
+APPEND_SLASH = True
 ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS = []
 CORS_ORIGIN_ALLOW_ALL=True
 
 REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -40,7 +42,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ],
 }
-
 # SIMPLE_JWT = {
 #    'AUTH_HEADER_TYPES': ('JWT',),
 # }
