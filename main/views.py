@@ -1,3 +1,4 @@
+from xml.dom import ValidationErr
 import requests
 from json import loads
 from django.http import JsonResponse
@@ -7,7 +8,7 @@ from .serializers import *
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.views import APIView
-from django.shortcuts import get_list_or_404
+from django.shortcuts import get_list_or_404, get_object_or_404
 
 
 def actiovation_post(request, uid, token):
@@ -22,17 +23,42 @@ class BacketDeleteView(generics.DestroyAPIView):
     """
     Требуется токен аутефикации!
     """
-    queryset = basket.objects.all()
     serializer_class = BacketSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_object(self, basket_id, user_id):
+        result = get_object_or_404(basket.objects.filter(id = basket_id, user=user_id))
+        if result.ordered == 1:
+            raise IndexError('Заказанный товар не подлежит изменению или удалению')
+        return result
 
     def delete(self, request, basket_id):
         basket_id = basket_id or request.query_params.get('basket_id')
         try:
-            result = basket.objects.get(id = basket_id, user=request.user.id)
+            result = self.get_object(basket_id, request.user.id)
             result.delete()
-            result.save()
-            return Response(f'Товар {result.name} был удален из корзины', status=status.HTTP_200_OK)
+            return Response({"detail":f'Товар {result.products.name} был удален из корзины'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def put(self, request, basket_id):
+        """
+        Требуется токен аутефикации!
+        {
+            "products": integer, 
+            "package": integer,
+            "quantity": integer
+        }
+        """
+        try:
+            data = request.data
+            data["user"] = request.user.id
+            result = self.get_object(basket_id, request.user.id)
+            serializer = BacketSerializer(result, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -58,6 +84,7 @@ class BacketView(APIView):
             "package": integer,
             "quantity": integer
         }
+        Если не указывать quantity в теле запроса, то стандартом выставится 1 для параметра quantity
         """
         data = request.data
         data["user"] = request.user.id
@@ -71,6 +98,7 @@ class BacketView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class OrderListView(APIView):
     permission_classes = [IsAuthenticated]

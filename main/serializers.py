@@ -18,7 +18,6 @@ class BacketSerializer(serializers.ModelSerializer):
             'ordered'
         ]
 
-
 class CommentsSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only = True)
     products = serializers.PrimaryKeyRelatedField(queryset = products.objects.all())
