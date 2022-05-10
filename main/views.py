@@ -1,4 +1,3 @@
-from msilib.schema import Error
 import requests
 from json import loads
 from django.http import JsonResponse
@@ -8,7 +7,7 @@ from .serializers import *
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.views import APIView
-from django.shortcuts import get_list_or_404, get_object_or_404
+from django.shortcuts import get_list_or_404
 
 
 def actiovation_post(request, uid, token):
@@ -63,11 +62,15 @@ class BacketView(APIView):
         data = request.data
         data["user"] = request.user.id
         serializer = BacketSerializer(data=data)
-        if serializer.is_valid(raise_exception=True):
+        try:
+            serializer.is_valid(raise_exception=True)
+            basket_exists = basket.objects.filter(package=data['package'], user=data["user"]).exists()
+            if basket_exists:
+                raise ValueError("Данный товар уже был добавлен в корзину")
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class OrderListView(APIView):
     permission_classes = [IsAuthenticated]
@@ -122,8 +125,10 @@ class OrderView(APIView):
         data["user"] = user
         serializer = OrderSerializerForPost(data=data)
         if serializer.is_valid(raise_exception=True):
+            # КОД СЫРОЙ, НЕОБХОДИМО ПЕРЕРАБОТАТЬ
             try:
                 order = serializer.save()
+                quantity_list = []
                 for basket_id in data["order_list"]:
                     basket_object = basket.objects.get(id=basket_id, user=user)
                     if basket_object.ordered == 1:
@@ -138,9 +143,21 @@ class OrderView(APIView):
                     serializer = OrderListSerializer(data=data)
                     if serializer.is_valid(raise_exception=True):
                         serializer.save()
-                ordered = basket.objects.get(id=basket_object.id)
-                ordered.ordered = 1
-                ordered.save()
+
+                    if getattr(package.objects.get(id=basket_object.package.id), 'quantity')-basket_object.quantity >= 0:
+                        quantity_list.append((basket_object.package.id,basket_object.quantity))
+                    else: raise ValueError(f'Невозможно заказть {basket_object.quantity} из пакета {basket_object.package.name}, так как количетство товара - {getattr(package.objects.get(id=basket_object.package.id), "quantity")}')
+                
+                for qu in quantity_list:
+                    package_id, quantity = qu
+                    ordered = basket.objects.get(package=package_id, user=user)
+                    ordered.ordered = 1
+                    ordered.save()
+
+                    new_package = package.objects.get(id=package_id)
+                    new_package.quantity = (new_package.quantity - quantity)
+                    new_package.save()
+
                 return Response({"detail": "Ваш заказ успешно принят!", "id": order.id}, status=status.HTTP_201_CREATED)
             except Exception as e:
                 if order:

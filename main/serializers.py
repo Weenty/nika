@@ -6,7 +6,6 @@ class BacketSerializer(serializers.ModelSerializer):
         queryset=products.objects.all())
     package = serializers.PrimaryKeyRelatedField(
         queryset=package.objects.all())
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
     ordered = serializers.IntegerField(read_only=True)
     class Meta:
         model = basket

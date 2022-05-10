@@ -22,16 +22,17 @@ class SectionsList(APIView):
         return Response(serializer.data)
 
 class CategorysList(APIView):
-    def get_products_in_category(self, id):
-        return get_list_or_404(products.objects.filter(category=id))
+    def get_products_in_category(self, category_id):
+        print('products.objects.filter(category=category_id)')
+        return get_list_or_404(products.objects.filter(category=category_id))
     
     def get_category_list(self):
         return get_list_or_404(section_and_caterogy.objects.filter(parent__isnull = False))
 
-    def get(self, request, pk=None):
-        id = pk or request.query_params.get('id')
-        if id:
-            serializer = serializers.ProductsSerializer(self.get_products_in_category(id), many=True)
+    def get(self, request, category_id=None):
+        category_id = category_id or request.query_params.get('category_id')
+        if category_id:
+            serializer = serializers.ProductsSerializer(self.get_products_in_category(category_id), many=True)
         else:
             serializer = serializers.SectionAndCategorySerializer(self.get_category_list(), many=True)
 

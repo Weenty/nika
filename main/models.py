@@ -46,7 +46,7 @@ def Calculate_rating(sender, instance, created, *args, **kwargs):
     new_rate.save()
 
 class basket(models.Model):
-    user = models.ForeignKey('users', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey('users', on_delete=models.CASCADE)
     products = models.ForeignKey(products, on_delete=models.CASCADE)
     package = models.ForeignKey(package, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
@@ -58,6 +58,8 @@ class basket(models.Model):
         verbose_name_plural = 'Товары корзины'
 
     def save(self, *args, **kwargs):
+        if (self.package.quantity - self.quantity) < 0:
+            raise ValueError(f"Невозможно поместить в корзину больше существующего количества товара. Количество товара {self.package.quantity}, вы поместити - {self.quantity}")
         packages = product_has_packages.objects.filter(product=self.products.id)
         flag = False
         for package in packages:
