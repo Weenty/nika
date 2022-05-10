@@ -59,9 +59,7 @@ admin.site.register(basket)
 admin.site.register(paymant_method)
 admin.site.register(point_of_issue)
 admin.site.register(receiving_method)
-@admin.register(comments)
-class CommentsAdmin(admin.ModelAdmin):
-    list_display = ['products', 'grade', 'user']
+admin.site.register(comments)
 
 
 

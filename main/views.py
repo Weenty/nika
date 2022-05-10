@@ -143,7 +143,6 @@ class OrderView(APIView):
         "receiving_method": 1,
         "payment_method": 1,
         "comment": "текст",
-        "quantity": 12,
         "order_list": [сюда передаем закидываем массив id корзины]
             }
         Требуется токен аутефикации!
@@ -195,35 +194,68 @@ class OrderView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class CommentsView(generics.ListCreateAPIView):
-    """
-    Для get-запроса необходим только path-параметр, содержащий id интересующего продукта. 
-    Для post-запроса структура подобного типа. (title и text можно оставить пустыми)
-        {
-            "title": string, 
-            "text": string,
-            "grade": int
-        }
-    """
-    queryset = comments.objects.all()
+class CommentsDeleteUpdateView(APIView):
     serializer_class = CommentsSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def get_categorys_in_section(self, id):
+    def get_comment(self, comment, id, user):
+        return get_object_or_404(comments.objects.filter(id=comment, products=id, user=user))
+
+    def delete(self, request, product_id, comment):
+        product_id = product_id or request.query_params.get('basket_id')
+        try:
+            result = self.get_comment(comment, product_id, request.user.id)
+            result.delete()
+            return Response({"detail":'Комментарий был удален'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, product_id, comment):
+        try:
+            data = request.data
+            data["user"] = request.user.id
+            data["products"] = product_id
+            result = self.get_comment(comment, product_id, request.user.id)
+            serializer = CommentsSerializer(result, data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommentsView(APIView):
+    serializer_class = CommentsSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_comments(self, id):
         return get_list_or_404(comments.objects.filter(products=id))
 
-    def list(self, request, product_id):
+    def get(self, request, product_id):
+        """
+        Для get-запроса необходим только path-параметр, содержащий id интересующего продукта. 
+        """
         id = product_id or request.query_params.get('product_id')
         serializer = CommentsSerializer(
-            self.get_categorys_in_section(id), many=True)
+            self.get_comments(id), many=True)
         return Response(serializer.data)
 
-    def create(self, request, product_id):
+    def post(self, request, product_id):
+        """
+            Для post-запроса структура подобного типа. (title и text можно оставить пустыми)
+            {
+                "title": string, 
+                "text": string,
+                "grade": int
+            }
+        """
         id = product_id or request.query_params.get('product_id')
+        if not basket.objects.filter(user=request.user.id, ordered=1, products=id).exists():
+            return Response({"datail": 'Вы не заказали данный товар, поэтому не можете оставлять отзывы'}, status=status.HTTP_400_BAD_REQUEST)
         data = request.data
         data['products'] = id
-        data["user"] = request.user.id
+        data['user'] = request.user.id
         serializer = CommentsSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()

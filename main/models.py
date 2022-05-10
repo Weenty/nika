@@ -16,7 +16,7 @@ class users(AbstractUser):
         return self.username
 
 class comments(models.Model):
-    user = models.ForeignKey('users', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey('users', on_delete=models.CASCADE)
     products = models.ForeignKey(products, on_delete=models.CASCADE)
     title = models.CharField(max_length=150, null=True, blank=True)
     text = models.TextField(default='', null=True, blank=True)
