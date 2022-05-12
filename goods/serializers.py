@@ -7,6 +7,11 @@ class SectionAndCategorySerializer(serializers.ModelSerializer):
         model = section_and_caterogy
         fields = ['id', 'name']
 
+class SectionAndCategoryPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = section_and_caterogy
+        fields = '__all__'
+
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = image
