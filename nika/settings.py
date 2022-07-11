@@ -4,7 +4,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-w3e&#cp2_15%-(84s#v7349e+q^qxp-zv_kh^1q0o*&9qh(jd)'
-DEBUG = False
+DEBUG = True
 
 INSTALLED_APPS = [
     'rest_framework.authtoken',
@@ -29,7 +29,7 @@ INSTALLED_APPS = [
 ]
 
 APPEND_SLASH = True
-ALLOWED_HOSTS = ['market.ruban.xyz', 'market.ruban.xyz/*', 'localhost']
+ALLOWED_HOSTS = ['market.ruban.xyz', '*', 'localhost']
 CORS_ORIGIN_ALLOW_ALL=True
 
 REST_FRAMEWORK = {
@@ -55,12 +55,31 @@ DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'auth/users/password/reset/confirm/{uid}/{token}',
     'USERNAME_RESET_CONFIRM_URL': 'auth/users/username/reset/confirm/{uid}/{token}',
     'ACTIVATION_URL': 'auth/users/activation/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL': True,
+    'SEND_ACTIVATION_EMAIL': False,
     'LOGOUT_ON_PASSWORD_CHANGE': True,
     'SERIALIZERS': {},
     'PERMISSIONS': {
         'user_list': ['rest_framework.permissions.IsAdminUser'],
     }
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/django/debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
 }
 
 MIDDLEWARE = [
@@ -98,11 +117,11 @@ WSGI_APPLICATION = 'nika.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': BASE_DIR / 'nika',
+        'NAME': 'nika',
         'USER': 'admin',
-        'PASSWORD': '',
+        'PASSWORD': 'qwerasdzxc676767qweasdzxc676767',
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '5432',
     }
 }
 
@@ -136,15 +155,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_ROOT = os.path.join(os.path.dirname(__file__), '/static/')
-STATIC_URL = '/static/'
-STATIC_FILE_ROOT = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
-)
-
-
-MEDIA_URL = '/uploads/'
+STATIC_URL = '/api/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_URL = '/api/uploads/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
 CKEDITOR_UPLOAD_PATH = "uploads/"

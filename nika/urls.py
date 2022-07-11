@@ -22,15 +22,16 @@ schema_view = get_schema_view(
  
 urlpatterns = [
    #  path(r'swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('api/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
    #  path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    path('admin/', admin.site.urls),
-    path('ckeditor/', include('ckeditor_uploader.urls')),
-    path('auth/', include('djoser.urls')),
-    path('auth/', include('djoser.urls.authtoken')),
-    path('auth/users/activation/<str:uid>/<str:token>', actiovation_post, name='accept Email'),
+    path('api/admin/', admin.site.urls),
+    path('api/ckeditor/', include('ckeditor_uploader.urls')),
+    path('api/auth/', include('djoser.urls')),
+    path('api/auth/', include('djoser.urls.authtoken')),
+    path('api/auth/users/activation/<str:uid>/<str:token>', actiovation_post, name='accept Email'),
     # path('auth/', include('djoser.urls.jwt')),
-    path('', include('goods.urls'), name='Get list section'),
-    path('', include('main.urls'), name='Get and post user backet'),
+    path('api/', include('goods.urls'), name='Get list section'),
+    path('api/', include('main.urls'), name='Get and post user backet'),
 ]
+urlpatterns +=static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns +=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
