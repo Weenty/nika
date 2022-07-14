@@ -45,11 +45,11 @@ REST_FRAMEWORK = {
 #    'AUTH_HEADER_TYPES': ('JWT',),
 # }
 
-EMAIL_USE_TLS = True
+EMAIL_USE_SSL = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'findo3184@gmail.com'
 EMAIL_HOST_PASSWORD = 'i33a05an'
-EMAIL_PORT = 587
+EMAIL_PORT = 465
 
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'auth/users/password/reset/confirm/{uid}/{token}',
