@@ -48,7 +48,7 @@ REST_FRAMEWORK = {
 EMAIL_USE_SSL = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'findo3184@gmail.com'
-EMAIL_HOST_PASSWORD = 'i33a05an'
+EMAIL_HOST_PASSWORD = 'dxeqgpnzrzfgkcjw'
 EMAIL_PORT = 465
 
 DJOSER = {
